@@ -1,17 +1,13 @@
 export default class ProductGrid {
   constructor(options) {
     this.data    = [];
+    this.productList = [];
     this.uniqueColor = [];
     this.uniqueBrand = [];
     this.showAvailable = false;
     this.filteredColor = new Set();
     this.filteredBrand = new Set();
     this.jsonUrl = options.jsonUrl;
-    this.pName   = options.name;
-    this.pUrl    = options.url;
-    this.pColor  = options.color;
-    this.pBrand  = options.brand;
-    this.pSold   = options.sold;
     this.$mainContainer    = $(options.mainContainer);
     this.$filterContainer  = this.$mainContainer.find($(options.filterContainer));
     this.$displayContainer = this.$mainContainer.find($(options.displayContainer));
@@ -26,10 +22,21 @@ export default class ProductGrid {
       dataType: "json",
       success: (data) => {
         this.data = data;
+        this.createProducts();
         this.createFilter();
         this.filterItems();
       }
     });
+  }
+  createProducts()
+  {
+    console.log('this.data :', this.data);
+    this.data.forEach(item => {
+      let product = new Product(item);
+      this.productList.push(product);
+    })
+
+    console.log('this.productList :', this.productList);
   }
 
   addFilters(brandArrays, colorArrays)
@@ -86,41 +93,29 @@ export default class ProductGrid {
 
   filterItems()
   {
-    let itemToDisplay = this.data;
+    let itemToDisplay = this.productList;
     if(this.showAvailable)
     {
-      itemToDisplay = this.data.filter((item) => { 
-        return (item[this.pSold] == 0)
+      itemToDisplay = this.productList.filter((item) => { 
+        return (item.sold_out == 0)
       })
     }
     if(this.filteredColor.size > 0) {
 
-      itemToDisplay = itemToDisplay.filter((item) => { return this.filteredColor.has(item[this.pColor])} )
+      itemToDisplay = itemToDisplay.filter((item) => { return this.filteredColor.has(item.color)} )
     }
     if(this.filteredBrand.size > 0) {      
-      itemToDisplay = itemToDisplay.filter((item) => { return this.filteredBrand.has(item[this.pBrand])} )
+      itemToDisplay = itemToDisplay.filter((item) => { return this.filteredBrand.has(item.brand)} )
     }
 
-    this.displayItems(itemToDisplay);
-  }
-
-  displayItems(itemToDisplay)
-  {
-    this.$displayContainer.children().detach();
-    itemToDisplay.forEach( (item) => {
-    let $element = 
-    $("<p>").addClass(this.styleClassName)
-    .append($("<img>", { src: "data/images/"+item[this.pUrl], width: "150px", height: "150px"}) );
-    
-    this.$displayContainer.append($element);
-    })
+    Display.show(itemToDisplay, this.$displayContainer, this.styleClassName);
   }
 
   createFilter()
   {
-    this.data.forEach((item) => {
-      this.uniqueColor.push(item[this.pColor]);
-      this.uniqueBrand.push(item[this.pBrand]); 
+    this.productList.forEach((item) => {
+      this.uniqueColor.push(item.color);
+      this.uniqueBrand.push(item.brand); 
     });
 
     this.uniqueBrand = this.uniqueSort(this.uniqueBrand);
@@ -147,4 +142,32 @@ export default class ProductGrid {
     }
     return 0;
   }
+}
+
+class Product
+{
+  constructor(item)
+  {
+    this.name     = item.name;
+    this.url      = item.url;
+    this.color    = item.color;
+    this.brand    = item.brand;
+    this.sold_out = item.sold_out;
+  }
+}
+
+class Display
+{
+  static show(itemToDisplay, $displayContainer, styleClassName)
+  {
+    $displayContainer.children().detach();
+    itemToDisplay.forEach( (item) => {
+    let $element = 
+    $("<p>").addClass(styleClassName)
+    .append($("<img>", { src: "data/images/"+item.url, width: "150px", height: "150px"}) );
+    
+    $displayContainer.append($element);
+    })
+  }
+
 }
