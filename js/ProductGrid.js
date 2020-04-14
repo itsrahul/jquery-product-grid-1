@@ -1,3 +1,6 @@
+import Product from './Product.js';
+import Display from './Display.js';
+
 export default class ProductGrid {
   constructor(options) {
     this.data    = [];
@@ -142,32 +145,4 @@ export default class ProductGrid {
     }
     return 0;
   }
-}
-
-class Product
-{
-  constructor(item)
-  {
-    this.name     = item.name;
-    this.url      = item.url;
-    this.color    = item.color;
-    this.brand    = item.brand;
-    this.sold_out = item.sold_out;
-  }
-}
-
-class Display
-{
-  static show(itemToDisplay, $displayContainer, styleClassName)
-  {
-    $displayContainer.children().detach();
-    itemToDisplay.forEach( (item) => {
-    let $element = 
-    $("<p>").addClass(styleClassName)
-    .append($("<img>", { src: "data/images/"+item.url, width: "150px", height: "150px"}) );
-    
-    $displayContainer.append($element);
-    })
-  }
-
 }
